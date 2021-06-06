@@ -97,11 +97,35 @@ function putUrl(keyName,folder, callback){
             callback.gogo(data.Location);
         }
     });
-
 }
+function uploadFile(keyName,folder, callback){
+    const fileStream = fs.createReadStream(keyName.path)
+    params = {
+        Bucket: BUCKET_NAME, // Bucket: bucketName,
+        Body : fileStream,
+        Key : folder+"/"+keyName.originalname,
+        ACL : "public-read"
+    };
+
+    s3.upload(params, function (err, data) {
+        if (err) {
+            console.log("Error", err);
+            
+        }
+    
+        //success
+        if (data) {
+         //   console.log("Uploaded in:", data.Location);
+            return callback( data.Location);
+            callback.gogo(data.Location);
+        }
+    });
+}
+
 
 AwsObj.getListBucket = getListBucket;
 AwsObj.putUrl = putUrl;
 AwsObj.deleteFromBucket = deleteFromBucket;
+AwsObj.uploadFile = uploadFile;
 
 module.exports = AwsObj;

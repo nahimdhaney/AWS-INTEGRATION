@@ -4,6 +4,8 @@ var AwsObj = require('./AwsService');
 const express = require('express');
 var bodyParser = require("body-parser");
 const server = express();
+const multer = require('multer')
+const upload = multer({ dest: 'uploads/' })
 
 server.use(bodyParser.urlencoded({ extended: false }));
 server.use(bodyParser.json());
@@ -34,6 +36,33 @@ server.post('/uploadImage',function(req,res){
             })
     }
   });
+
+  var cpUpload = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'folder' }])
+
+  server.post('/imageUpload', upload.single('image'),function(req,res){
+    const file = req.file
+    console.log(file) ;
+    console.log(req.body.folder);
+    // req.body 
+    var keyname = file;// url
+    var keyfold = req.body.folder;// url
+    if (!keyname && !keyfold){
+        res.end("No params");
+    }else{
+
+            AwsObj.uploadFile(keyname,keyfold,function(response){
+                // Here you have access to your variable
+                var respuesta = response;
+                var obj = `{
+                    "status" : "Success",
+                    "data" : "${respuesta}"
+                    }`;
+                    console.log(obj);
+                    res.status(200).send(obj);    
+            })
+    }
+  });
+
 
   server.get('/getImages', function(req, res) {
     var keyname = req.query.codProduto;// codproduto
